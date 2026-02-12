@@ -16,11 +16,7 @@ const { spot, prevSpot, nextSpot, relatedSpots } = Astro.props;
 ---
 <Layout title={spot.title} description={spot.desc} image={spot.imageUrl}>
     <nav class="fixed-nav">
-        <div class="header-logo">
-            <a href="/" style="text-decoration:none; color:inherit;">
-                <i class="fa-solid fa-arrow-left"></i> MAPに戻る
-            </a>
-        </div>
+        <a href="/" class="header-logo" style="cursor:pointer; text-decoration:none;"><i class="fa-solid fa-arrow-left"></i> MAPに戻る</a>
         <div class="header-logo">MIHARA REDISCOVER</div>
         <div style="width:50px;"></div>
     </nav>
@@ -40,7 +36,7 @@ const { spot, prevSpot, nextSpot, relatedSpots } = Astro.props;
                 </h1>
                 
                 <div id="modal-desc" class="text-sm font-medium leading-loose mb-8 text-slate-600 whitespace-pre-wrap">
-                    {spot.desc || '紹介文がありません。'}
+                    {spot.desc || '紹介文がありません。'}</p>
                 </div>
                 
                 <!-- マップボタン -->

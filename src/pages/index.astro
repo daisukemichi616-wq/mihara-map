@@ -70,7 +70,7 @@ const reversedSpots = [...spots].reverse();
         
         <div id="gallery-wrap">
             <div id="gallery-grid" class="photo-grid">
-                <!-- ★SEO対策: ここでデータをサーバーサイドレンダリング -->
+                <!-- ★SEO対策: データはAstroで事前生成し、クラスは元のまま維持 -->
                 {reversedSpots.map((spot) => (
                     <a href={`/spots/${spot.slug}`} class="photo-item block group" data-area={spot.area}>
                         <img src={spot.imageUrl} alt={spot.title} loading="lazy" />
@@ -93,7 +93,6 @@ const reversedSpots = [...spots].reverse();
             <p id="text-contact-desc" class="text-sm text-gray-500 leading-loose font-bold mb-8">
                 隠れた名所、美味しいグルメ、四季折々の風景、まちのイベント、あるいは何気ない日常のひとコマなど、三原の魅力が伝わる写真を幅広く募集しています。
             </p>
-            
             <div class="bg-white/60 p-6 rounded-lg border border-blue-100 shadow-sm inline-block text-center mb-12 insta-cta-box" style="margin-top:0; border-radius:8px; border-style:solid; border-width:1px;">
                 <p class="text-xs text-blue-900 leading-loose font-bold">
                     以下の情報を添えて、Instagram<br>
@@ -101,7 +100,6 @@ const reversedSpots = [...spots].reverse();
                     内容を確認の上、サイトに追加させていただきます！
                 </p>
             </div>
-            
             <div class="card-frame border-2 border-blue-100">
                 <h5 class="text-center font-bold text-[10px] border-b pb-4 mb-6 tracking-widest uppercase text-blue-900">Required Information</h5>
                 <ul class="text-[11px] font-bold space-y-4 text-gray-600">
@@ -110,7 +108,6 @@ const reversedSpots = [...spots].reverse();
                     <li class="flex items-center gap-2"><i class="fa-solid fa-user text-blue-900"></i> 撮影者名 / SNSリンク (任意)</li>
                 </ul>
             </div>
-            
             <div class="insta-cta-box">
                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Contact via Instagram</p>
                 <a href="https://www.instagram.com/mihara_sampo" target="_blank" rel="noopener noreferrer" class="insta-btn-final">
@@ -298,7 +295,7 @@ const reversedSpots = [...spots].reverse();
                 }
             }
         }
-        window.switchView = switchView; // グローバル公開
+        window.switchView = switchView;
 
         // --- Map Initialization (with pre-loaded data) ---
         function initMap() {
@@ -333,15 +330,13 @@ const reversedSpots = [...spots].reverse();
             });
         }
 
-        // --- Tab Filtering (using pre-rendered elements) ---
+        // --- Tab Filtering ---
         document.querySelectorAll('.tab-item').forEach(tab => {
             tab.addEventListener('click', () => {
                 document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
                 tab.classList.add('active');
-                
                 const filter = tab.getAttribute('data-area');
                 const items = document.querySelectorAll('.photo-item');
-                
                 items.forEach(item => {
                     if (filter === 'all' || item.getAttribute('data-area') === filter) {
                         item.style.display = 'block';
@@ -352,9 +347,6 @@ const reversedSpots = [...spots].reverse();
             });
         });
         
-        // 初期RPGモードの適用
-        if (localStorage.getItem('rpg-mode') === 'true') {
-            toggleRPGMode();
-        }
+        if (localStorage.getItem('rpg-mode') === 'true') toggleRPGMode();
     </script>
 </Layout>
