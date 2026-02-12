@@ -26,18 +26,16 @@ export async function fetchSpots() {
                             const key = k.trim().toLowerCase();
                             clean[key] = val;
                         });
-
                         if (!clean.title) return null;
                         
                         clean.slug = clean.id || `spot-${i + 1}`;
                         clean.imageUrl = formatDriveUrl(clean.image, 'w1000');
                         clean.lat = clean.lat ? parseFloat(clean.lat) : 0;
                         clean.lng = clean.lng ? parseFloat(clean.lng) : 0;
-                        
                         clean.snsUrl = clean.sns || clean.snsurl || clean.url || clean.link || "";
                         clean.authorName = clean.author || clean.nickname || clean.name || "管理者";
                         clean.description = clean.desc || clean.description || "紹介文がありません。";
-
+                        
                         const areas = { 'all': 'すべてのエリア', 'mihara': '三原市街', 'daiwa': '大和', 'kui': '久井', 'hongo': '本郷', 'sagi': '佐木島' };
                         clean.areaLabel = areas[clean.area] || clean.area || 'MIHARA';
                         return clean;
@@ -46,5 +44,5 @@ export async function fetchSpots() {
                 }
             });
         });
-    } catch (e) { resolve([]); }
+    } catch (e) { return []; }
 }

@@ -1,52 +1,198 @@
 ---
-import Layout from '../layouts/Layout.astro';
 import { fetchSpots } from '../utils/google-sheets';
-
 const spots = await fetchSpots();
 const reversedSpots = [...spots].reverse();
 ---
-<Layout>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="referrer" content="no-referrer">
+    <title>三原市まち歩き - PHOTO MAP | 三原市の魅力を再発見するプロジェクト</title>
+    <meta name="description" content="広島県三原市の魅力を再発見するフォトマッププロジェクト。地元の人だけが知る絶景や隠れたスポットを写真と地図で紹介しています。">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Serif+JP:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+    
+    <!-- CSS / Icons -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+
+    <!-- ★元のスタイルをそのまま記述 (is:inline) -->
+    <style is:inline>
+        :root { --palette-blue: #004098; --palette-blue-light: #e1f5fe; --palette-sky: #f0f7ff; --palette-gold: #f5d76e; --text-main: #1a1a1a; --text-sub: #4b5563; --border-soft: #e2e8f0; }
+        html { scroll-behavior: smooth; }
+        *:not(i):not(svg):not(polyline):not(rect):not(path):not(circle):not(line) { font-family: 'Zen Maru Gothic', sans-serif !important; font-weight: 500; }
+        .serif-custom { font-family: 'Noto Serif JP', serif !important; font-weight: 700 !important; }
+        body { color: var(--text-main); background-color: #fff; margin: 0; padding-top: 60px; overflow-x: hidden; -webkit-text-size-adjust: 100%; line-height: 1.8; transition: background-color 0.5s ease, color 0.5s ease; }
+        
+        .fixed-nav { position: fixed; top: 0; left: 0; width: 100%; height: 60px; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border-soft); z-index: 9999; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; transition: all 0.5s ease; }
+        .header-logo { font-weight: 700 !important; font-size: 0.8rem; color: var(--palette-blue); letter-spacing: 0.05em; }
+        .nav-links-wrap { display: flex; gap: 10px; align-items: center; }
+        .nav-simple-link { font-size: 10px; font-weight: 700 !important; color: #9ca3af; cursor: pointer; transition: color 0.2s; text-decoration: none; white-space: nowrap; }
+        .nav-simple-link:active, .nav-simple-link:hover { color: var(--palette-blue); }
+        
+        #rpg-toggle-btn { background: var(--palette-blue); border: 1px solid var(--palette-blue); color: white; font-family: 'Zen Maru Gothic', sans-serif; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 10px; font-weight: 700; transition: all 0.3s; display: flex; align-items: center; gap: 6px; margin-left: 4px; white-space: nowrap; box-shadow: 0 2px 6px rgba(0, 64, 152, 0.2); }
+        #rpg-toggle-btn:hover { background: #00337a; transform: translateY(-1px); }
+        #rpg-toggle-btn i { color: var(--palette-gold); font-size: 12px; }
+
+        .hero-view { position: relative; width: 100%; height: 80vh; height: 80dvh; background-color: #f7f7f7; overflow: hidden; }
+        .slider-container { position: absolute; inset: 0; z-index: 1; }
+        .slide { position: absolute; inset: 0; opacity: 0; transition: opacity 2s ease-in-out; }
+        .slide.active { opacity: 1; }
+        .slide img { width: 100%; height: 100%; object-fit: cover; }
+        .hero-overlay { position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.3) 100%); z-index: 2; }
+        .hero-content { position: relative; z-index: 10; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; color: white; padding: 0 20px; text-align: center; }
+        .hero-label { font-size: 0.75rem; font-weight: 700 !important; letter-spacing: 0.4em; color: var(--palette-gold); margin-bottom: 25px; display: block; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); }
+        .hero-title { font-size: 1.65rem; line-height: 1.8; text-shadow: 0 0 20px rgba(0,0,0,0.8), 0 2px 10px rgba(0,0,0,0.5); }
+        .mobile-br { display: block; }
+        
+        .section-wrap { padding: 100px 24px; scroll-margin-top: 60px; position: relative; transition: background-color 0.5s ease; }
+        .inner-limit { max-width: 750px; margin: 0 auto; text-align: center; }
+        .section-tag-label { font-size: 0.8rem; font-weight: 700 !important; color: var(--palette-blue); letter-spacing: 0.25em; margin-bottom: 40px; display: block; text-transform: uppercase; }
+        .card-frame { background: white; border-radius: 12px; padding: 40px 25px; margin-bottom: 30px; text-align: left; border: 1px solid var(--border-soft); box-shadow: 0 10px 30px rgba(0,64,152,0.03); transition: all 0.5s ease; }
+        .card-frame h4 { font-weight: 700 !important; color: var(--palette-blue); margin-bottom: 12px; font-size: 1rem; border-left: 5px solid var(--palette-blue); padding-left: 15px; }
+        .card-frame p { font-size: 0.85rem; font-weight: 500 !important; line-height: 2.3; color: var(--text-sub); }
+
+        .sticky-tab-bar { position: sticky; top: 60px; background: rgba(255,255,255,0.98); z-index: 900; border-bottom: 2px solid var(--palette-blue); overflow-x: auto; white-space: nowrap; transition: all 0.5s ease; }
+        .sticky-tab-bar::-webkit-scrollbar { display: none; }
+        .tab-flex { display: flex; padding: 0 10px; justify-content: center; }
+        .tab-item { padding: 22px 18px; font-size: 0.85rem; font-weight: 700 !important; color: #9ca3af; border-bottom: 4px solid transparent; cursor: pointer; }
+        .tab-item.active { color: var(--palette-blue); border-bottom-color: var(--palette-blue); }
+
+        .view-switch { display: inline-flex; background: #f1f5f9; padding: 4px; border-radius: 50px; margin-bottom: 20px; transition: all 0.5s ease; }
+        .view-btn { padding: 8px 24px; border-radius: 40px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.3s; color: #64748b; display: flex; align-items: center; }
+        .view-btn.active { background: white; color: var(--palette-blue); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+
+        .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border-soft); }
+        .photo-item { position: relative; aspect-ratio: 1/1; background: #f3f4f6; overflow: hidden; cursor: pointer; }
+        .photo-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        
+        /* 写真の文字演出 */
+        .photo-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 80%); opacity: 0; transition: opacity 0.6s ease; display: flex; flex-direction: column; justify-content: flex-end; padding: 10px; pointer-events: none; }
+        .photo-overlay span { transform: translateY(15px); opacity: 0; transition: transform 0.6s cubic-bezier(0.215, 0.61, 0.355, 1), opacity 0.6s ease; }
+        @media (hover: hover) {
+            .photo-item:hover img { transform: scale(1.1); }
+            .photo-item:hover .photo-overlay { opacity: 1; }
+            .photo-item:hover .photo-overlay span { transform: translateY(0); opacity: 1; }
+            .photo-item:hover .photo-overlay span:nth-child(2) { transition-delay: 0.05s; }
+        }
+        @media (hover: none) {
+            .photo-item.in-view .photo-overlay { opacity: 1; transition-delay: 0.1s; }
+            .photo-item.in-view .photo-overlay span { transform: translateY(0); opacity: 1; transition-delay: 0.3s; }
+        }
+
+        #map-container { height: 60vh; min-height: 500px; width: 100%; z-index: 1; display: none; border-bottom: 1px solid var(--border-soft); }
+        #map-container.active { display: block; }
+        .leaflet-popup-content-wrapper { border-radius: 8px; overflow: hidden; padding: 0; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+        .leaflet-popup-content { margin: 0; width: 220px !important; }
+        
+        .h2-one-line { font-size: 1.6rem; font-weight: 700 !important; margin-bottom: 50px; line-height: 1.2; text-align: center; white-space: nowrap; letter-spacing: -0.07em; color: var(--palette-blue); }
+        .insta-cta-box { margin-top: 60px; padding: 40px 20px; background: #fff; border: 2px dashed var(--palette-blue-light); border-radius: 20px; display: flex; flex-direction: column; align-items: center; gap: 20px; transition: all 0.5s ease; }
+        .insta-btn-final { display: flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: white !important; padding: 18px 45px; border-radius: 100px; font-weight: 700 !important; text-decoration: none; font-size: 1rem; box-shadow: 0 10px 25px rgba(220, 39, 67, 0.25); white-space: nowrap; }
+        
+        .img-divider-box { position: relative; width: 100%; height: auto; min-height: 320px; aspect-ratio: 16/9; overflow: hidden; border-top: 1px solid var(--border-soft); border-bottom: 1px solid var(--border-soft); background: #f3f4f6; }
+        .img-divider-box img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+        .img-divider-content { position: relative; z-index: 2; height: 100%; display: flex; align-items: flex-end; padding: 25px; }
+        
+        .bottom-view-container { position: relative; width: 100%; height: auto; min-height: 450px; aspect-ratio: 4/5; overflow: hidden; border-top: 1px solid var(--border-soft); background: #f3f4f6; }
+        .bottom-view-container img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+        .bottom-view-overlay { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 50px; }
+        .floating-badge { background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 20px 35px; text-align: center; border: 1px solid rgba(255,255,255,0.3); border-radius: 4px; }
+        
+        .footer-main { text-align: center; background-color: #fff; border-top: 1px solid var(--border-soft); padding: 60px 20px 60px 20px; transition: background-color 0.5s ease; }
+        .footer-copy { font-size: 9px; font-weight: 700 !important; color: #9ca3af; letter-spacing: 0.3em; margin-bottom: 12px; text-transform: uppercase; }
+        .footer-produced { font-size: 8px; font-weight: 500 !important; color: #cbd5e1; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+        .footer-note { font-size: 8px; font-weight: 500 !important; color: #cbd5e1; letter-spacing: 0.05em; }
+
+        @media (min-width: 640px) {
+            .header-logo { font-size: 1rem; letter-spacing: 0.1em; } .nav-links-wrap { gap: 20px; } .nav-simple-link { font-size: 12px; }
+            .hero-title { font-size: 2.8rem; line-height: 1.6; } .mobile-br { display: none; }
+            .photo-grid { grid-template-columns: repeat(4, 1fr); }
+            .bottom-view-container { aspect-ratio: 16/7; }
+        }
+        @media (max-width: 640px) {
+            .nav-simple-link { font-size: 9px; } .nav-links-wrap { gap: 6px; } #rpg-toggle-btn { padding: 5px 10px; font-size: 9px; } .tab-flex { justify-content: flex-start; }
+        }
+        @media (max-width: 380px) { .header-logo { display: none; } .fixed-nav { justify-content: center; } .h2-one-line { font-size: 1.25rem; } }
+
+        /* RPG Mode */
+        body.rpg-mode { background-color: #000 !important; color: #fff !important; font-family: 'DotGothic16', sans-serif !important; }
+        body.rpg-mode *:not(i) { font-family: 'DotGothic16', sans-serif !important; letter-spacing: 0.1em; }
+        body.rpg-mode img { filter: none; image-rendering: auto; }
+        body.rpg-mode .leaflet-layer { filter: contrast(120%) saturate(200%); image-rendering: pixelated; image-rendering: crisp-edges; }
+        body.rpg-mode .card-frame, body.rpg-mode .fixed-nav, body.rpg-mode .sticky-tab-bar, body.rpg-mode .popup-info, body.rpg-mode .insta-cta-box, body.rpg-mode .footer-main, body.rpg-mode .section-wrap:nth-child(even) {
+            background: #00008b !important; border: 3px double #fff !important; border-radius: 4px !important; color: #fff !important; box-shadow: 0 0 0 2px #000;
+        }
+        body.rpg-mode .section-wrap { background-color: #000 !important; }
+        body.rpg-mode #contact { border-top: none !important; }
+        body.rpg-mode h1, body.rpg-mode h2, body.rpg-mode h3, body.rpg-mode h4, body.rpg-mode h5, body.rpg-mode p, body.rpg-mode span, body.rpg-mode a, body.rpg-mode div, body.rpg-mode li { color: #fff !important; text-shadow: 2px 2px 0 #000; }
+        body.rpg-mode .inner-limit p, body.rpg-mode #contact p { display: inline-block; text-align: left; }
+        body.rpg-mode .text-blue-900, body.rpg-mode .section-tag-label, body.rpg-mode h4, body.rpg-mode #modal-area, body.rpg-mode #modal-sns { color: #f5d76e !important; border-color: #f5d76e !important; }
+        body.rpg-mode .view-switch { background: #000 !important; }
+        body.rpg-mode .view-btn, body.rpg-mode .tab-item { background: #000 !important; border: 2px solid #fff !important; color: #fff !important; margin: 2px; }
+        body.rpg-mode .view-btn.active, body.rpg-mode .tab-item.active { background: #a52a2a !important; color: #ff0 !important; border-color: #ff0 !important; }
+        body.rpg-mode #rpg-toggle-btn { background: #000 !important; border: 2px solid #fff !important; color: #fff !important; font-family: 'DotGothic16', sans-serif !important; }
+        body.rpg-mode #about { padding-bottom: 40px !important; }
+        body.rpg-mode #gallery { padding-top: 60px !important; }
+        body.rpg-mode #sub-map { color: #1a1a1a !important; text-shadow: none; }
+    </style>
+</head>
+<body id="top">
+
     <nav class="fixed-nav">
         <div class="header-logo" id="header-logo">MIHARA REDISCOVER</div>
         <div class="nav-links-wrap">
-            <a href="#gallery" class="nav-simple-link">マップ</a>
-            <a href="#contact" class="nav-simple-link">掲載募集</a>
-            <a href="#guideline" class="nav-simple-link">掲載案内</a>
+            <div class="nav-simple-link" onclick="scrollToId('gallery')">マップ</div>
+            <div class="nav-simple-link" onclick="scrollToId('contact')">掲載募集</div>
+            <div class="nav-simple-link" onclick="scrollToId('guideline')">掲載案内</div>
             <button id="rpg-toggle-btn" onclick="toggleRPGMode()">
                 <i class="fa-solid fa-dungeon"></i> <span>冒険の扉</span>
             </button>
         </div>
     </nav>
 
-    <section class="relative w-full h-[80vh] overflow-hidden">
-        <div class="absolute inset-0">
-             <div class="slide active absolute inset-0 transition-opacity duration-1000"><img src="https://i.postimg.cc/Dy2sThhC/IMG-9586.jpg" class="w-full h-full object-cover"></div>
-             <div class="slide absolute inset-0 opacity-0 transition-opacity duration-1000"><img src="https://i.postimg.cc/Z56hFGB9/IMG-9585.jpg" class="w-full h-full object-cover"></div>
+    <section class="hero-view">
+        <div class="slider-container">
+            <div class="slide active"><img src="https://i.postimg.cc/Dy2sThhC/IMG-9586.jpg" alt="桜"></div>
+            <div class="slide"><img src="https://i.postimg.cc/Z56hFGB9/IMG-9585.jpg" alt="旗"></div>
+            <div class="slide"><img src="https://i.postimg.cc/cLypHF9y/IMG-9584.jpg" alt="海"></div>
         </div>
-        <div class="absolute inset-0 bg-black/20 z-10"></div>
-        <div class="relative z-20 h-full flex flex-col justify-center items-center text-white text-center px-5">
-            <span id="hero-label" class="text-[#f5d76e] text-xs font-bold tracking-[0.4em] mb-6">MIHARA REDISCOVER PROJECT</span>
-            <h1 id="hero-title" class="serif-custom text-3xl md:text-5xl leading-relaxed">まだ知らない三原の景色を、<br>みんなで描くフォトマップ</h1>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <span class="hero-label" id="hero-label">MIHARA REDISCOVER PROJECT</span>
+            <h1 class="hero-title serif-custom" id="hero-title">まだ知らない三原の景色を、<br class="mobile-br">みんなで描くフォトマップ</h1>
         </div>
     </section>
 
     <section id="about" class="section-wrap bg-white">
         <div class="inner-limit">
-            <span id="label-about" class="section-tag-label">About Project</span>
-            <h3 id="title-about" class="serif-custom text-[#004098] text-2xl mb-12">みんなで描く、三原の未来</h3>
-            <div id="card-about" class="card-frame border-2 border-blue-50">
-                <p class="text-sm font-bold text-justify">広島県三原市は、瀬戸内海の穏やかな気候と豊かな自然に恵まれた街です。このプロジェクトは、そんな三原の日常にある「美しさ」を再発見するためのもの。地元の人だけが知る特別な場所や、日常のふとした風景を写真で紡ぎ、共有していきます。</p>
+            <span class="section-tag-label" id="label-about">About Project</span>
+            <h3 class="serif-custom text-blue-900 text-2xl mb-12" id="title-about">みんなで描く、三原の未来</h3>
+            <div class="card-frame border-2 border-blue-50" id="card-about">
+                <p class="text-sm font-bold text-justify">広島県三原市（みはらし）は、瀬戸内海の穏やかな気候と豊かな自然に恵まれた、歴史と文化が息づく街です。陸・海・空の交通の要衝として知られ、「広島空港」がある空の玄関口でもあります。<br><br>このプロジェクトは、そんな三原の日常にある「美しさ」を再発見するためのもの。地元の人だけが知る特別な場所や、日常のふとした風景を写真で紡ぎ、共有していきます。</p>
             </div>
         </div>
     </section>
 
-    <section id="gallery" class="bg-white">
-        <div class="text-center py-10">
-            <h3 id="title-map" class="serif-custom text-[#004098] text-2xl mb-4">PHOTO MAP</h3>
+    <section id="gallery" class="bg-white" style="padding-top: 0;">
+        <div class="pt-0 pb-8 px-6 text-center">
+            <h3 class="serif-custom text-blue-900 text-2xl mb-4" id="title-map">PHOTO MAP</h3>
             <p id="sub-map" class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-6">Find Your Favorite Spot</p>
-            <div class="flex justify-center gap-4">
-                <button id="btn-view-grid" onclick="switchView('grid')" class="bg-[#004098] text-white px-6 py-2 rounded-full text-xs font-bold">PHOTO</button>
-                <button id="btn-view-map" onclick="switchView('map')" class="bg-gray-100 text-gray-400 px-6 py-2 rounded-full text-xs font-bold">MAP</button>
+            <div class="view-switch">
+                <div id="btn-view-grid" class="view-btn active" onclick="switchView('grid')"><i class="fa-solid fa-border-all mr-2"></i> PHOTO</div>
+                <div id="btn-view-map" class="view-btn" onclick="switchView('map')"><i class="fa-solid fa-map-location-dot mr-2"></i> MAP</div>
             </div>
         </div>
 
@@ -63,96 +209,225 @@ const reversedSpots = [...spots].reverse();
         
         <div id="gallery-wrap">
             <div id="gallery-grid" class="photo-grid">
+                <!-- ★SEO対応: 事前に生成されたHTML (onclickではなくhrefで遷移) -->
                 {reversedSpots.map((spot) => (
-                    <a href={`/spots/${spot.slug}`} class="photo-item block group" data-area={spot.area}>
+                    <a href={`/spots/${spot.slug}`} class="photo-item block" data-area={spot.area}>
                         <img src={spot.imageUrl} alt={spot.title} loading="lazy">
                         <div class="photo-overlay">
-                            <span class="text-white text-[9px] font-bold tracking-widest uppercase mb-1">{spot.areaLabel}</span>
-                            <span class="text-white text-sm font-bold serif-custom">{spot.title}</span>
+                            <span class="text-[9px] text-white font-bold tracking-widest uppercase mb-1">{spot.areaLabel}</span>
+                            <span class="text-sm text-white font-bold serif-custom drop-shadow-md">{spot.title}</span>
                         </div>
                     </a>
                 ))}
             </div>
         </div>
-        <div id="map-container" class="w-full h-[60vh] hidden border-y border-slate-200"></div>
+
+        <div id="map-container"></div>
     </section>
 
-    <section id="contact" class="section-wrap bg-[#f0f7ff] border-t border-slate-200">
+    <section id="contact" class="section-wrap" style="background-color: var(--palette-sky); border-top: 1px solid var(--border-soft);">
         <div class="inner-limit">
-            <span id="label-contact" class="section-tag-label">Photo Submission</span>
-            <h2 id="title-contact" class="h2-one-line serif-custom text-[#004098]">三原の魅力を教えてください</h2>
-            <div class="insta-cta-box bg-white p-10 rounded-2xl border-2 border-dashed border-blue-100">
-                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6">Contact via Instagram</p>
-                <a href="https://www.instagram.com/mihara_sampo" target="_blank" class="bg-gradient-to-r from-orange-400 to-pink-600 text-white font-bold py-4 px-10 rounded-full inline-block shadow-lg">InstagramでDMを送る</a>
+            <span class="section-tag-label" id="label-contact">Photo Submission</span>
+            <h2 class="h2-one-line serif-custom" id="title-contact">三原の魅力を教えてください</h2>
+            <p id="text-contact-desc" class="text-sm text-gray-500 leading-loose font-bold mb-8">隠れた名所、美味しいグルメ、四季折々の風景、まちのイベント、あるいは何気ない日常のひとコマなど、三原の魅力が伝わる写真を幅広く募集しています。</p>
+            <div class="bg-white/60 p-6 rounded-lg border border-blue-100 shadow-sm inline-block text-center mb-12 insta-cta-box" style="margin-top:0; border-radius:8px; border-style:solid; border-width:1px;">
+                <p class="text-xs text-blue-900 leading-loose font-bold">以下の情報を添えて、Instagram<br>（<a href="https://www.instagram.com/mihara_sampo" target="_blank" rel="noopener noreferrer" class="underline decoration-blue-300">@mihara_sampo</a>）のDMよりお送りください。<br>内容を確認の上、サイトに追加させていただきます！</p>
+            </div>
+            <div class="card-frame border-2 border-blue-100">
+                <h5 class="text-center font-bold text-[10px] border-b pb-4 mb-6 tracking-widest uppercase text-blue-900">Required Information</h5>
+                <ul class="text-[11px] font-bold space-y-4 text-gray-600">
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-camera text-[#004098]"></i> 写真データ (JPEG/PNGなど)</li>
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-pen text-[#004098]"></i> スポット名 / 紹介コメント</li>
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-user text-[#004098]"></i> 撮影者名 / SNSリンク (任意)</li>
+                </ul>
+            </div>
+            <div class="insta-cta-box">
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Contact via Instagram</p>
+                <a href="https://www.instagram.com/mihara_sampo" target="_blank" rel="noopener noreferrer" class="insta-btn-final">
+                    <i class="fa-brands fa-instagram text-xl"></i> InstagramでDMを送る
+                </a>
             </div>
         </div>
     </section>
 
-    <section id="guideline" class="section-wrap bg-white">
+    <div class="img-divider-box">
+        <img src="https://i.postimg.cc/FFc54tpJ/IMG-9587.jpg" alt="SUNAMI BEACH PARK">
+        <div class="img-divider-content"><span class="text-white text-[10px] font-bold tracking-widest bg-black/40 p-2 rounded uppercase shadow-xl">SUNAMI BEACH PARK</span></div>
+    </div>
+
+    <section id="guideline" class="section-wrap" style="background-color: var(--palette-sky);">
         <div class="inner-limit">
-            <span class="section-tag-label">Guidelines</span>
-            <h2 class="h2-one-line serif-custom text-slate-800">写真掲載についてのご案内</h2>
+            <span class="section-tag-label" id="label-guideline">Guidelines</span>
+            <h2 class="h2-one-line serif-custom text-slate-800" id="title-guideline">写真掲載についてのご案内</h2>
             <div class="space-y-6">
                 <div class="card-frame"><h4>写真掲載のルール</h4><p>地域の魅力を伝えることを目的に、風景やお店、日常のひとコマを掲載しています。</p></div>
-                <div class="card-frame"><h4>権利とマナー</h4><p>著作権は撮影者本人にあります。人物や私有地が写る場合は必ず許可を得てからご投稿ください。</p></div>
+                <div class="card-frame"><h4>権利とマナー</h4><p>著作権は撮影者本人にあります。人物や私有地が写る場合は、必ず権利者の許可を得てからご投稿ください。</p></div>
+                <div class="card-frame"><h4>写真の取り扱い</h4><p>ご提供いただいた写真は、当サイトや関連SNSにおいて三原を盛り上げる広報活動に大切に使用させていただきます。</p></div>
             </div>
         </div>
     </section>
 
-    <footer class="footer-main py-16 bg-white border-t text-center">
-        <p class="text-[9px] font-bold text-gray-400 tracking-[0.3em] uppercase mb-3">&copy; 2026 Mihara Walk Photo Map</p>
-        <p class="text-[8px] text-slate-300 tracking-widest">PRODUCED BY MICHIM</p>
+    <section class="bottom-view-container">
+        <img src="https://i.postimg.cc/Df1DNrfM/IMG-9590.jpg" alt="三原港パノラマ">
+        <div class="bottom-view-overlay"><div class="floating-badge"><p class="serif-custom italic text-2xl mb-1 text-white">Beautiful Mihara,</p><p class="text-white text-[9px] font-bold tracking-[0.4em] uppercase">REDISCOVER PROJECT</p></div></div>
+    </section>
+
+    <footer class="footer-main">
+        <p class="footer-copy">&copy; 2026 Mihara Walk Photo Map</p>
+        <p class="footer-produced">PRODUCED BY MICHIM | ALL PHOTOS BY MIHARA WALK COMMUNITY</p>
+        <p class="footer-note" style="margin-top: 8px;">このサイトは個人が運営する非公式サイトです。</p>
     </footer>
 
+    <!-- JSデータ受け渡し -->
     <script id="spots-data" type="application/json">{JSON.stringify(reversedSpots)}</script>
 
+    <!-- ★元のJavaScriptを is:inline でそのまま実行 -->
     <script is:inline>
+        // --- 冒険の書モード用ロジック ---
         const originalTexts = {};
         function toggleRPGMode() {
-            const isRPG = document.body.classList.toggle('rpg-mode');
-            localStorage.setItem('rpg-mode', isRPG);
+            const body = document.body;
             const btn = document.getElementById('rpg-toggle-btn');
+            const isRPG = body.classList.toggle('rpg-mode');
+            localStorage.setItem('rpg-mode', isRPG);
+
             if (isRPG) {
                 btn.innerHTML = '<i class="fa-solid fa-book-open"></i> <span>現代に戻る</span>';
                 swapText('header-logo', 'MIHARA QUEST');
+                swapText('hero-label', 'MIHARA QUEST PROJECT');
                 swapText('hero-title', '勇者よ、まだ見ぬ三原の<br>地図を完成させるのだ');
+                swapText('label-about', 'QUEST INFO');
+                swapText('title-about', '冒険の目的');
+                if(document.querySelector('#card-about p')) {
+                   const originalP = document.querySelector('#card-about p');
+                   if (!originalP._originalHTML) originalP._originalHTML = originalP.innerHTML;
+                   originalP.innerHTML = 'ここ　ミハラは　いにしえより　つづく　まち。<br><br>ゆうしゃよ、このせかいに　かくれた<br>「うるわしきもの」を　さがしだすのだ。<br><br>それが　みつかりしとき、<br>あらたな　でんせつが　はじまるのだ。<br><br>さあ　ゆくがよい！<br>ぼうけんの　たびは　はじまった！';
+                }
+                swapText('title-map', 'WORLD MAP');
+                swapText('sub-map', 'Find Hidden Treasures');
+                swapText('label-contact', 'Guild Request');
+                swapText('title-contact', '情報をギルドに送る');
+                if(document.querySelector('#text-contact-desc')) {
+                    const el = document.querySelector('#text-contact-desc');
+                    if (!el._originalHTML) el._originalHTML = el.innerHTML;
+                    el.innerHTML = 'ミハラには まだみぬ 「うるわしき ケシキ」や<br>「ウマいもの」が かくされている。<br><br>たびびとよ、そなたのみつけた<br>「ミハラのキオク」を ギルドにおしえてくれ！';
+                }
+                swapText('label-guideline', 'Rules');
+                swapText('title-guideline', '冒険の掟');
+                document.getElementById('btn-view-grid').innerHTML = '<i class="fa-solid fa-dungeon"></i> しらべる';
+                document.getElementById('btn-view-map').innerHTML = '<i class="fa-solid fa-map"></i> ちず';
             } else {
                 btn.innerHTML = '<i class="fa-solid fa-dungeon"></i> <span>冒険の扉</span>';
                 restoreText('header-logo');
+                restoreText('hero-label');
                 restoreText('hero-title');
+                restoreText('label-about');
+                restoreText('title-about');
+                if(document.querySelector('#card-about p')) restoreTextByElement(document.querySelector('#card-about p'));
+                restoreText('title-map');
+                restoreText('sub-map');
+                restoreText('label-contact');
+                restoreText('title-contact');
+                if(document.querySelector('#text-contact-desc')) restoreTextByElement(document.querySelector('#text-contact-desc'));
+                restoreText('label-guideline');
+                restoreText('title-guideline');
+                document.getElementById('btn-view-grid').innerHTML = '<i class="fa-solid fa-border-all mr-2"></i> PHOTO';
+                document.getElementById('btn-view-map').innerHTML = '<i class="fa-solid fa-map-location-dot mr-2"></i> MAP';
             }
         }
-        function swapText(id, txt) { const el = document.getElementById(id); if (el) { originalTexts[id] = el.innerHTML; el.innerHTML = txt; } }
+        function swapText(id, newText) { const el = document.getElementById(id); if (el) { if (!originalTexts[id]) originalTexts[id] = el.innerHTML; el.innerHTML = newText; } }
         function restoreText(id) { const el = document.getElementById(id); if (el && originalTexts[id]) el.innerHTML = originalTexts[id]; }
+        function swapTextByElement(el, newText) { if (!el) return; if (!el._originalHTML) el._originalHTML = el.innerHTML; el.innerHTML = newText; }
+        function restoreTextByElement(el) { if (el && el._originalHTML) el.innerHTML = el._originalHTML; }
+
+        function scrollToId(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                const headerOffset = 60;
+                const elementPosition = el.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+            }
+        }
+
+        // --- スライダー ---
+        window.addEventListener('load', () => {
+            let currentSlide = 0;
+            const slides = document.querySelectorAll('.slide');
+            if(slides.length > 0) {
+                setInterval(() => {
+                    slides[currentSlide].classList.remove('active');
+                    currentSlide = (currentSlide + 1) % slides.length;
+                    slides[currentSlide].classList.add('active');
+                }, 6000);
+            }
+        });
+
+        // --- View Switch ---
+        const btnGrid = document.getElementById('btn-view-grid');
+        const btnMap = document.getElementById('btn-view-map');
+        const gridWrap = document.getElementById('gallery-wrap');
+        const mapContainer = document.getElementById('map-container');
+        const stickyTab = document.querySelector('.sticky-tab-bar');
 
         function switchView(mode) {
-            const grid = document.getElementById('gallery-wrap');
-            const mapC = document.getElementById('map-container');
-            const bG = document.getElementById('btn-view-grid');
-            const bM = document.getElementById('btn-view-map');
-            if (mode === 'grid') { grid.style.display = 'block'; mapC.style.display = 'none'; bG.className = 'bg-[#004098] text-white px-6 py-2 rounded-full text-xs font-bold'; bM.className = 'bg-gray-100 text-gray-400 px-6 py-2 rounded-full text-xs font-bold'; }
-            else { grid.style.display = 'none'; mapC.style.display = 'block'; bM.className = 'bg-[#004098] text-white px-6 py-2 rounded-full text-xs font-bold'; bG.className = 'bg-gray-100 text-gray-400 px-6 py-2 rounded-full text-xs font-bold'; if (!window.mapInstance) initMap(); else setTimeout(() => window.mapInstance.invalidateSize(), 200); }
+            if (mode === 'grid') {
+                gridWrap.style.display = 'block';
+                mapContainer.classList.remove('active');
+                btnGrid.classList.add('active');
+                btnMap.classList.remove('active');
+                if(stickyTab) stickyTab.style.display = 'block';
+            } else {
+                gridWrap.style.display = 'none';
+                mapContainer.classList.add('active');
+                btnGrid.classList.remove('active');
+                btnMap.classList.add('active');
+                if(stickyTab) stickyTab.style.display = 'block';
+                if (!window.mapInstance) initMap(); else setTimeout(() => window.mapInstance.invalidateSize(), 200);
+            }
         }
+        window.switchView = switchView;
+
         function initMap() {
             const data = JSON.parse(document.getElementById('spots-data').textContent);
             window.mapInstance = L.map('map-container').setView([34.4000, 133.0800], 12);
             L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(window.mapInstance);
             const cluster = L.markerClusterGroup({ showCoverageOnHover: false });
             data.forEach(s => {
-                if (s.lat && s.lng) {
+                if(s.lat && s.lng) {
                     const html = `<div style="width:200px"><img src="${s.imageUrl}" style="width:100%;height:100px;object-fit:cover;"><div style="padding:10px;font-weight:bold;">${s.title}</div><a href="/spots/${s.slug}" style="display:block;text-align:right;color:#004098;font-size:11px;">詳細を見る →</a></div>`;
                     cluster.addLayer(L.marker([s.lat, s.lng]).bindPopup(html));
                 }
             });
             window.mapInstance.addLayer(cluster);
         }
+
+        // --- Tabs ---
         document.querySelectorAll('.tab-item').forEach(tab => {
             tab.addEventListener('click', () => {
-                document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active')); tab.classList.add('active');
+                document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
                 const area = tab.getAttribute('data-area');
-                document.querySelectorAll('.photo-item').forEach(item => { item.style.display = (area === 'all' || item.getAttribute('data-area') === area) ? 'block' : 'none'; });
+                document.querySelectorAll('.photo-item').forEach(item => {
+                    item.style.display = (area === 'all' || item.getAttribute('data-area') === area) ? 'block' : 'none';
+                });
             });
         });
+
+        // --- IntersectionObserver for Animation (ホバー演出の補助) ---
+        const observerOptions = { root: null, rootMargin: '0px', threshold: 0.25 };
+        const itemObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('in-view');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+        document.querySelectorAll('.photo-item').forEach(item => itemObserver.observe(item));
+
+        // 初期ロード時
         if (localStorage.getItem('rpg-mode') === 'true') toggleRPGMode();
     </script>
-</Layout>
+</body>
+</html>
