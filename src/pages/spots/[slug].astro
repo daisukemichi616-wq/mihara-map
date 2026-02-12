@@ -4,95 +4,47 @@ import { fetchSpots } from '../../utils/google-sheets';
 
 export async function getStaticPaths() {
     const allSpots = await fetchSpots();
-    const sortedSpots = [...allSpots].reverse();
-    return sortedSpots.map((spot, index) => {
-        const prevSpot = index > 0 ? sortedSpots[index - 1] : null;
-        const nextSpot = index < sortedSpots.length - 1 ? sortedSpots[index + 1] : null;
-        const relatedSpots = sortedSpots.filter(s => s.area === spot.area && s.slug !== spot.slug).slice(0, 3);
-        return { params: { slug: spot.slug }, props: { spot, prevSpot, nextSpot, relatedSpots } };
-    });
+    return allSpots.map((spot) => ({ params: { slug: spot.slug }, props: { spot } }));
 }
-const { spot, prevSpot, nextSpot, relatedSpots } = Astro.props;
+const { spot } = Astro.props;
 ---
-<Layout title={spot.title} description={spot.desc} image={spot.imageUrl}>
+<Layout title={spot.title} description={spot.description} image={spot.imageUrl}>
     <nav class="fixed-nav">
-        <a href="/" class="header-logo" style="cursor:pointer; text-decoration:none;"><i class="fa-solid fa-arrow-left"></i> MAPに戻る</a>
+        <div class="header-logo"><a href="/" style="text-decoration:none; color:inherit;"><i class="fa-solid fa-arrow-left"></i> MAPに戻る</a></div>
         <div class="header-logo">MIHARA REDISCOVER</div>
-        <div style="width:50px;"></div>
+        <div style="width:40px;"></div>
     </nav>
 
-    <!-- モーダル風のレイアウト -->
-    <div style="background-color:rgba(0,0,0,0.5); min-height:100vh; padding-top:80px; padding-bottom:80px;">
-        <div id="modal-content-area" class="max-w-[600px] mx-auto bg-white shadow-2xl rounded-lg overflow-hidden relative">
-            <img id="modal-img" src={spot.imageUrl} class="w-full aspect-square object-cover">
+    <div style="background-color:rgba(0,0,0,0.5); min-height:100vh; padding: 80px 20px; display:flex; justify-content:center; align-items:start;">
+        <div id="modal-content-area" class="w-full max-w-[600px] bg-white shadow-2xl rounded-lg overflow-hidden relative">
+            <img src={spot.imageUrl} class="w-full aspect-square object-cover">
             
             <div class="px-8 py-12 text-left">
-                <span id="modal-area" class="section-tag-label text-[9px] border border-blue-600 px-3 py-1 mb-6 inline-block">
-                    {spot.areaLabel}
-                </span>
+                <span id="modal-area" class="text-[9px] font-bold tracking-widest text-blue-600 border border-blue-600 px-3 py-1 mb-6 inline-block uppercase">{spot.areaLabel}</span>
+                <h1 id="modal-title" class="serif-custom text-2xl mb-4 leading-normal text-slate-800">{spot.title}</h1>
+                <p id="modal-desc" class="text-sm font-medium leading-loose mb-8 text-slate-600 whitespace-pre-wrap">{spot.description}</p>
                 
-                <h1 id="modal-title" class="serif-custom text-2xl mb-4 leading-normal text-slate-800">
-                    {spot.title}
-                </h1>
-                
-                <div id="modal-desc" class="text-sm font-medium leading-loose mb-8 text-slate-600 whitespace-pre-wrap">
-                    {spot.desc || '紹介文がありません。'}</p>
-                </div>
-                
-                <!-- マップボタン -->
-                <a id="modal-map-btn" href={spot.map_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent("三原市 " + spot.title)}`} target="_blank" rel="noopener noreferrer" class="mb-10 flex items-center justify-center gap-2 w-full border border-blue-900 text-blue-900 font-bold text-xs py-4 rounded hover:bg-blue-50 transition">
-                    <i class="fa-solid fa-location-dot"></i>
-                    この場所をGoogleマップで見る
+                <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent("三原市 " + spot.title)}`} target="_blank" class="mb-10 flex items-center justify-center gap-2 w-full border border-blue-900 text-blue-900 font-bold text-xs py-4 rounded hover:bg-blue-50 transition">
+                    <i class="fa-solid fa-location-dot"></i> この場所をGoogleマップで見る
                 </a>
 
                 <div class="flex items-center justify-between border-t border-slate-200 pt-8">
-                    <span id="modal-author" class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
-                        PHOTO BY {spot.author || '管理者'}
-                    </span>
-                    {spot.sns && (
-                        <a id="modal-sns" href={spot.sns} target="_blank" rel="noopener noreferrer" class="text-gray-900 font-bold text-[10px] border-b border-gray-900 pb-1 uppercase hover:opacity-70 transition">
-                            Instagram Link
-                        </a>
+                    <span id="modal-author" class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">PHOTO BY {spot.authorName}</span>
+                    {spot.snsUrl ? (
+                        <a id="modal-sns" href={spot.snsUrl} target="_blank" class="text-gray-900 font-bold text-[10px] border-b border-gray-900 pb-1 uppercase hover:opacity-70 transition">Instagram Link</a>
+                    ) : (
+                        <span class="text-gray-300 text-[10px] font-bold uppercase">No SNS Account</span>
                     )}
-                </div>
-            </div>
-
-            <!-- 関連記事（SEOリンク） -->
-            <div class="bg-gray-50 p-6 border-t">
-                <h4 class="text-center font-bold text-[10px] text-blue-900 mb-4 tracking-widest">NEARBY SPOTS</h4>
-                <div class="flex justify-between">
-                    <div class="w-1/2 text-left">
-                        {prevSpot && <a href={`/spots/${prevSpot.slug}`} class="text-[10px] font-bold text-gray-400 hover:text-blue-900 block truncate">← {prevSpot.title}</a>}
-                    </div>
-                    <div class="w-1/2 text-right">
-                        {nextSpot && <a href={`/spots/${nextSpot.slug}`} class="text-[10px] font-bold text-gray-400 hover:text-blue-900 block truncate">{nextSpot.title} →</a>}
-                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script is:inline>
-        // 個別ページ用RPGモード
-        const spotData = {
-            rpg_title: document.getElementById('rpg-title-data')?.textContent,
-            rpg_desc: document.getElementById('rpg-desc-data')?.textContent
-        };
-
+    <script is:inline define:vars={{r_title: spot.rpg_title, r_desc: spot.rpg_desc}}>
         if (localStorage.getItem('rpg-mode') === 'true') {
             document.body.classList.add('rpg-mode');
-            
-            // 要素の書き換え
-            if(spotData.rpg_title) document.getElementById('modal-title').textContent = spotData.rpg_title;
-            if(spotData.rpg_desc) document.getElementById('modal-desc').innerHTML = spotData.rpg_desc.replace(/\n/g, '<br>');
-            
-            const areaLabel = document.getElementById('modal-area');
-            if(areaLabel) areaLabel.style.color = '#f5d76e';
-            
-            const mapBtn = document.getElementById('modal-map-btn');
-            if(mapBtn) mapBtn.innerHTML = '<i class="fa-solid fa-map"></i> ちずを ひらく';
+            if (r_title) document.getElementById('modal-title').textContent = r_title;
+            if (r_desc) document.getElementById('modal-desc').innerHTML = r_desc.replace(/\n/g, '<br>');
         }
     </script>
-    <div style="display:none;" id="rpg-title-data">{spot.rpg_title}</div>
-    <div style="display:none;" id="rpg-desc-data">{spot.rpg_desc}</div>
 </Layout>

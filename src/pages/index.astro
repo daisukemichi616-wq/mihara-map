@@ -9,51 +9,44 @@ const reversedSpots = [...spots].reverse();
     <nav class="fixed-nav">
         <div class="header-logo" id="header-logo">MIHARA REDISCOVER</div>
         <div class="nav-links-wrap">
-            <div class="nav-simple-link" onclick="scrollToId('gallery')">マップ</div>
-            <div class="nav-simple-link" onclick="scrollToId('contact')">掲載募集</div>
-            <div class="nav-simple-link" onclick="scrollToId('guideline')">掲載案内</div>
+            <a href="#gallery" class="nav-simple-link">マップ</a>
+            <a href="#contact" class="nav-simple-link">掲載募集</a>
+            <a href="#guideline" class="nav-simple-link">掲載案内</a>
             <button id="rpg-toggle-btn" onclick="toggleRPGMode()">
                 <i class="fa-solid fa-dungeon"></i> <span>冒険の扉</span>
             </button>
         </div>
     </nav>
 
-    <section class="hero-view">
-        <div class="slider-container">
-            <div class="slide active"><img src="https://i.postimg.cc/Dy2sThhC/IMG-9586.jpg" alt="桜"></div>
-            <div class="slide"><img src="https://i.postimg.cc/Z56hFGB9/IMG-9585.jpg" alt="旗"></div>
-            <div class="slide"><img src="https://i.postimg.cc/cLypHF9y/IMG-9584.jpg" alt="海"></div>
+    <section class="relative w-full h-[80vh] overflow-hidden">
+        <div class="absolute inset-0">
+             <div class="slide active absolute inset-0 transition-opacity duration-1000"><img src="https://i.postimg.cc/Dy2sThhC/IMG-9586.jpg" class="w-full h-full object-cover"></div>
+             <div class="slide absolute inset-0 opacity-0 transition-opacity duration-1000"><img src="https://i.postimg.cc/Z56hFGB9/IMG-9585.jpg" class="w-full h-full object-cover"></div>
         </div>
-        <div class="hero-overlay"></div>
-        <div class="hero-content">
-            <span class="hero-label" id="hero-label">MIHARA REDISCOVER PROJECT</span>
-            <h1 class="hero-title serif-custom" id="hero-title">
-                まだ知らない三原の景色を、<br class="mobile-br">
-                みんなで描くフォトマップ
-            </h1>
+        <div class="absolute inset-0 bg-black/20 z-10"></div>
+        <div class="relative z-20 h-full flex flex-col justify-center items-center text-white text-center px-5">
+            <span id="hero-label" class="text-[#f5d76e] text-xs font-bold tracking-[0.4em] mb-6">MIHARA REDISCOVER PROJECT</span>
+            <h1 id="hero-title" class="serif-custom text-3xl md:text-5xl leading-relaxed">まだ知らない三原の景色を、<br>みんなで描くフォトマップ</h1>
         </div>
     </section>
 
     <section id="about" class="section-wrap bg-white">
         <div class="inner-limit">
-            <span class="section-tag-label" id="label-about">About Project</span>
-            <h3 class="serif-custom text-blue-900 text-2xl mb-12" id="title-about">みんなで描く、三原の未来</h3>
-            <div class="card-frame border-2 border-blue-50" id="card-about">
-                <p class="text-sm font-bold text-justify">
-                    広島県三原市（みはらし）は、瀬戸内海の穏やかな気候と豊かな自然に恵まれた、歴史と文化が息づく街です。陸・海・空の交通の要衝として知られ、「広島空港」がある空の玄関口でもあります。<br><br>
-                    このプロジェクトは、そんな三原の日常にある「美しさ」を再発見するためのもの。地元の人だけが知る特別な場所や、日常のふとした風景を写真で紡ぎ、共有していきます。
-                </p>
+            <span id="label-about" class="section-tag-label">About Project</span>
+            <h3 id="title-about" class="serif-custom text-[#004098] text-2xl mb-12">みんなで描く、三原の未来</h3>
+            <div id="card-about" class="card-frame border-2 border-blue-50">
+                <p class="text-sm font-bold text-justify">広島県三原市は、瀬戸内海の穏やかな気候と豊かな自然に恵まれた街です。このプロジェクトは、そんな三原の日常にある「美しさ」を再発見するためのもの。地元の人だけが知る特別な場所や、日常のふとした風景を写真で紡ぎ、共有していきます。</p>
             </div>
         </div>
     </section>
 
-    <section id="gallery" class="bg-white" style="padding-top: 0;">
-        <div class="pt-0 pb-8 px-6 text-center">
-            <h3 class="serif-custom text-blue-900 text-2xl mb-4" id="title-map">PHOTO MAP</h3>
+    <section id="gallery" class="bg-white">
+        <div class="text-center py-10">
+            <h3 id="title-map" class="serif-custom text-[#004098] text-2xl mb-4">PHOTO MAP</h3>
             <p id="sub-map" class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-6">Find Your Favorite Spot</p>
-            <div class="view-switch">
-                <div id="btn-view-grid" class="view-btn active" onclick="switchView('grid')"><i class="fa-solid fa-border-all mr-2"></i> PHOTO</div>
-                <div id="btn-view-map" class="view-btn" onclick="switchView('map')"><i class="fa-solid fa-map-location-dot mr-2"></i> MAP</div>
+            <div class="flex justify-center gap-4">
+                <button id="btn-view-grid" onclick="switchView('grid')" class="bg-[#004098] text-white px-6 py-2 rounded-full text-xs font-bold">PHOTO</button>
+                <button id="btn-view-map" onclick="switchView('map')" class="bg-gray-100 text-gray-400 px-6 py-2 rounded-full text-xs font-bold">MAP</button>
             </div>
         </div>
 
@@ -70,283 +63,96 @@ const reversedSpots = [...spots].reverse();
         
         <div id="gallery-wrap">
             <div id="gallery-grid" class="photo-grid">
-                <!-- ★SEO対策: データはAstroで事前生成し、クラスは元のまま維持 -->
                 {reversedSpots.map((spot) => (
                     <a href={`/spots/${spot.slug}`} class="photo-item block group" data-area={spot.area}>
-                        <img src={spot.imageUrl} alt={spot.title} loading="lazy" />
+                        <img src={spot.imageUrl} alt={spot.title} loading="lazy">
                         <div class="photo-overlay">
-                            <span class="text-[9px] text-white font-bold tracking-widest uppercase mb-1">{spot.areaLabel}</span>
-                            <span class="text-sm text-white font-bold serif-custom drop-shadow-md">{spot.title}</span>
+                            <span class="text-white text-[9px] font-bold tracking-widest uppercase mb-1">{spot.areaLabel}</span>
+                            <span class="text-white text-sm font-bold serif-custom">{spot.title}</span>
                         </div>
                     </a>
                 ))}
             </div>
         </div>
-
-        <div id="map-container"></div>
+        <div id="map-container" class="w-full h-[60vh] hidden border-y border-slate-200"></div>
     </section>
 
-    <section id="contact" class="section-wrap" style="background-color: var(--palette-sky); border-top: 1px solid var(--border-soft);">
+    <section id="contact" class="section-wrap bg-[#f0f7ff] border-t border-slate-200">
         <div class="inner-limit">
-            <span class="section-tag-label" id="label-contact">Photo Submission</span>
-            <h2 class="h2-one-line serif-custom" id="title-contact">三原の魅力を教えてください</h2>
-            <p id="text-contact-desc" class="text-sm text-gray-500 leading-loose font-bold mb-8">
-                隠れた名所、美味しいグルメ、四季折々の風景、まちのイベント、あるいは何気ない日常のひとコマなど、三原の魅力が伝わる写真を幅広く募集しています。
-            </p>
-            <div class="bg-white/60 p-6 rounded-lg border border-blue-100 shadow-sm inline-block text-center mb-12 insta-cta-box" style="margin-top:0; border-radius:8px; border-style:solid; border-width:1px;">
-                <p class="text-xs text-blue-900 leading-loose font-bold">
-                    以下の情報を添えて、Instagram<br>
-                    （<a href="https://www.instagram.com/mihara_sampo" target="_blank" rel="noopener noreferrer" class="underline decoration-blue-300">@mihara_sampo</a>）のDMよりお送りください。<br>
-                    内容を確認の上、サイトに追加させていただきます！
-                </p>
-            </div>
-            <div class="card-frame border-2 border-blue-100">
-                <h5 class="text-center font-bold text-[10px] border-b pb-4 mb-6 tracking-widest uppercase text-blue-900">Required Information</h5>
-                <ul class="text-[11px] font-bold space-y-4 text-gray-600">
-                    <li class="flex items-center gap-2"><i class="fa-solid fa-camera text-blue-900"></i> 写真データ (JPEG/PNGなど)</li>
-                    <li class="flex items-center gap-2"><i class="fa-solid fa-pen text-blue-900"></i> スポット名 / 紹介コメント</li>
-                    <li class="flex items-center gap-2"><i class="fa-solid fa-user text-blue-900"></i> 撮影者名 / SNSリンク (任意)</li>
-                </ul>
-            </div>
-            <div class="insta-cta-box">
-                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Contact via Instagram</p>
-                <a href="https://www.instagram.com/mihara_sampo" target="_blank" rel="noopener noreferrer" class="insta-btn-final">
-                    <i class="fa-brands fa-instagram text-xl"></i>
-                    InstagramでDMを送る
-                </a>
+            <span id="label-contact" class="section-tag-label">Photo Submission</span>
+            <h2 id="title-contact" class="h2-one-line serif-custom text-[#004098]">三原の魅力を教えてください</h2>
+            <div class="insta-cta-box bg-white p-10 rounded-2xl border-2 border-dashed border-blue-100">
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6">Contact via Instagram</p>
+                <a href="https://www.instagram.com/mihara_sampo" target="_blank" class="bg-gradient-to-r from-orange-400 to-pink-600 text-white font-bold py-4 px-10 rounded-full inline-block shadow-lg">InstagramでDMを送る</a>
             </div>
         </div>
     </section>
 
-    <div class="img-divider-box">
-        <img src="https://i.postimg.cc/FFc54tpJ/IMG-9587.jpg" alt="SUNAMI BEACH PARK">
-        <div class="img-divider-content">
-            <span class="text-white text-[10px] font-bold tracking-widest bg-black/40 p-2 rounded uppercase shadow-xl">SUNAMI BEACH PARK</span>
-        </div>
-    </div>
-
-    <section id="guideline" class="section-wrap" style="background-color: var(--palette-sky);">
+    <section id="guideline" class="section-wrap bg-white">
         <div class="inner-limit">
-            <span class="section-tag-label" id="label-guideline">Guidelines</span>
-            <h2 class="h2-one-line serif-custom text-slate-800" id="title-guideline">写真掲載についてのご案内</h2>
+            <span class="section-tag-label">Guidelines</span>
+            <h2 class="h2-one-line serif-custom text-slate-800">写真掲載についてのご案内</h2>
             <div class="space-y-6">
-                <div class="card-frame">
-                    <h4>写真掲載のルール</h4>
-                    <p>地域の魅力を伝えることを目的に、風景やお店、日常のひとコマを掲載しています。どなたでも自由に掲載できる仕組みではなく、ご連絡をいただいた内容を確認した上で掲載を行っています。</p>
-                </div>
-                <div class="card-frame">
-                    <h4>権利とマナー</h4>
-                    <p>著作権は撮影者本人にあります。人物や私有地が写る場合は、必ず権利者の許可を得てからご投稿ください。不適切な写真は掲載を見送る場合がございます。</p>
-                </div>
-                <div class="card-frame">
-                    <h4>写真の取り扱い</h4>
-                    <p>ご提供いただいた写真は、当サイトや関連SNSにおいて三原を盛り上げる広報活動に大切に使用させていただきます。投稿者さんの意思を尊重し、丁寧に扱わせていただきます。</p>
-                </div>
+                <div class="card-frame"><h4>写真掲載のルール</h4><p>地域の魅力を伝えることを目的に、風景やお店、日常のひとコマを掲載しています。</p></div>
+                <div class="card-frame"><h4>権利とマナー</h4><p>著作権は撮影者本人にあります。人物や私有地が写る場合は必ず許可を得てからご投稿ください。</p></div>
             </div>
         </div>
     </section>
 
-    <section class="bottom-view-container">
-        <img src="https://i.postimg.cc/Df1DNrfM/IMG-9590.jpg" alt="三原港パノラマ">
-        <div class="bottom-view-overlay">
-            <div class="floating-badge">
-                <p class="serif-custom italic text-2xl mb-1 text-white">Beautiful Mihara,</p>
-                <p class="text-white text-[9px] font-bold tracking-[0.4em] uppercase">REDISCOVER PROJECT</p>
-            </div>
-        </div>
-    </section>
-
-    <footer class="footer-main">
-        <p class="footer-copy">&copy; 2026 Mihara Walk Photo Map</p>
-        <p class="footer-produced">PRODUCED BY MICHIM | ALL PHOTOS BY MIHARA WALK COMMUNITY</p>
-        <p class="footer-note" style="margin-top: 8px;">このサイトは個人が運営する非公式サイトです。</p>
+    <footer class="footer-main py-16 bg-white border-t text-center">
+        <p class="text-[9px] font-bold text-gray-400 tracking-[0.3em] uppercase mb-3">&copy; 2026 Mihara Walk Photo Map</p>
+        <p class="text-[8px] text-slate-300 tracking-widest">PRODUCED BY MICHIM</p>
     </footer>
 
-    <!-- データ埋め込み（マップ用） -->
     <script id="spots-data" type="application/json">{JSON.stringify(reversedSpots)}</script>
 
     <script is:inline>
-        // --- 冒険の書モード用ロジック ---
         const originalTexts = {};
-
         function toggleRPGMode() {
-            const body = document.body;
-            const btn = document.getElementById('rpg-toggle-btn');
-            const isRPG = body.classList.toggle('rpg-mode');
+            const isRPG = document.body.classList.toggle('rpg-mode');
             localStorage.setItem('rpg-mode', isRPG);
-
+            const btn = document.getElementById('rpg-toggle-btn');
             if (isRPG) {
                 btn.innerHTML = '<i class="fa-solid fa-book-open"></i> <span>現代に戻る</span>';
                 swapText('header-logo', 'MIHARA QUEST');
-                swapText('hero-label', 'MIHARA QUEST PROJECT');
                 swapText('hero-title', '勇者よ、まだ見ぬ三原の<br>地図を完成させるのだ');
-                swapText('label-about', 'QUEST INFO');
-                swapText('title-about', '冒険の目的');
-                if(document.querySelector('#card-about p')) {
-                   const originalP = document.querySelector('#card-about p');
-                   if (!originalP._originalHTML) originalP._originalHTML = originalP.innerHTML;
-                   originalP.innerHTML = 'ここ　ミハラは　いにしえより　つづく　まち。<br><br>ゆうしゃよ、このせかいに　かくれた<br>「うるわしきもの」を　さがしだすのだ。<br><br>それが　みつかりしとき、<br>あらたな　でんせつが　はじまるのだ。<br><br>さあ　ゆくがよい！<br>ぼうけんの　たびは　はじまった！';
-                }
-                swapText('title-map', 'WORLD MAP');
-                swapText('sub-map', 'Find Hidden Treasures');
-                swapText('label-contact', 'Guild Request');
-                swapText('title-contact', '情報をギルドに送る');
-                if(document.querySelector('#text-contact-desc')) {
-                    const el = document.querySelector('#text-contact-desc');
-                    if (!el._originalHTML) el._originalHTML = el.innerHTML;
-                    el.innerHTML = 'ミハラには まだみぬ 「うるわしき ケシキ」や<br>「ウマいもの」が かくされている。<br><br>たびびとよ、そなたのみつけた<br>「ミハラのキオク」を ギルドにおしえてくれ！';
-                }
-                swapText('label-guideline', 'Rules');
-                swapText('title-guideline', '冒険の掟');
-                document.getElementById('btn-view-grid').innerHTML = '<i class="fa-solid fa-dungeon"></i> しらべる';
-                document.getElementById('btn-view-map').innerHTML = '<i class="fa-solid fa-map"></i> ちず';
             } else {
                 btn.innerHTML = '<i class="fa-solid fa-dungeon"></i> <span>冒険の扉</span>';
                 restoreText('header-logo');
-                restoreText('hero-label');
                 restoreText('hero-title');
-                restoreText('label-about');
-                restoreText('title-about');
-                if(document.querySelector('#card-about p')) restoreTextByElement(document.querySelector('#card-about p'));
-                restoreText('title-map');
-                restoreText('sub-map');
-                restoreText('label-contact');
-                restoreText('title-contact');
-                if(document.querySelector('#text-contact-desc')) restoreTextByElement(document.querySelector('#text-contact-desc'));
-                restoreText('label-guideline');
-                restoreText('title-guideline');
-                document.getElementById('btn-view-grid').innerHTML = '<i class="fa-solid fa-border-all mr-2"></i> PHOTO';
-                document.getElementById('btn-view-map').innerHTML = '<i class="fa-solid fa-map-location-dot mr-2"></i> MAP';
             }
         }
+        function swapText(id, txt) { const el = document.getElementById(id); if (el) { originalTexts[id] = el.innerHTML; el.innerHTML = txt; } }
+        function restoreText(id) { const el = document.getElementById(id); if (el && originalTexts[id]) el.innerHTML = originalTexts[id]; }
 
-        function swapText(id, newText) {
-            const el = document.getElementById(id);
-            if (el) {
-                if (!originalTexts[id]) originalTexts[id] = el.innerHTML;
-                el.innerHTML = newText;
-            }
-        }
-        function restoreText(id) {
-            const el = document.getElementById(id);
-            if (el && originalTexts[id]) {
-                el.innerHTML = originalTexts[id];
-            }
-        }
-        function swapTextByElement(el, newText) {
-            if (!el) return;
-            if (!el._originalHTML) el._originalHTML = el.innerHTML;
-            el.innerHTML = newText;
-        }
-        function restoreTextByElement(el) {
-            if (el && el._originalHTML) {
-                el.innerHTML = el._originalHTML;
-            }
-        }
-
-        // --- 既存機能 ---
-        function scrollToId(id) {
-            const el = document.getElementById(id);
-            if (el) {
-                const headerOffset = 60;
-                const elementPosition = el.getBoundingClientRect().top;
-                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-                window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-            }
-        }
-
-        let currentSlide = 0;
-        const slides = document.querySelectorAll('.slide');
-        function rotateSlides() {
-            if (slides.length < 2) return;
-            setInterval(() => {
-                slides[currentSlide].classList.remove('active');
-                currentSlide = (currentSlide + 1) % slides.length;
-                slides[currentSlide].classList.add('active');
-            }, 6000);
-        }
-        rotateSlides();
-
-        // --- View Switch ---
         function switchView(mode) {
-            const gridWrap = document.getElementById('gallery-wrap');
-            const mapContainer = document.getElementById('map-container');
-            const btnGrid = document.getElementById('btn-view-grid');
-            const btnMap = document.getElementById('btn-view-map');
-            const stickyTab = document.querySelector('.sticky-tab-bar');
-
-            if (mode === 'grid') {
-                gridWrap.style.display = 'block';
-                mapContainer.classList.remove('active');
-                btnGrid.classList.add('active');
-                btnMap.classList.remove('active');
-                if(stickyTab) stickyTab.style.display = 'block';
-            } else {
-                gridWrap.style.display = 'none';
-                mapContainer.classList.add('active');
-                btnGrid.classList.remove('active');
-                btnMap.classList.add('active');
-                if(stickyTab) stickyTab.style.display = 'block';
-                
-                if (!window.mapInstance) {
-                    initMap();
-                } else {
-                    setTimeout(() => { window.mapInstance.invalidateSize(); }, 200);
-                }
-            }
+            const grid = document.getElementById('gallery-wrap');
+            const mapC = document.getElementById('map-container');
+            const bG = document.getElementById('btn-view-grid');
+            const bM = document.getElementById('btn-view-map');
+            if (mode === 'grid') { grid.style.display = 'block'; mapC.style.display = 'none'; bG.className = 'bg-[#004098] text-white px-6 py-2 rounded-full text-xs font-bold'; bM.className = 'bg-gray-100 text-gray-400 px-6 py-2 rounded-full text-xs font-bold'; }
+            else { grid.style.display = 'none'; mapC.style.display = 'block'; bM.className = 'bg-[#004098] text-white px-6 py-2 rounded-full text-xs font-bold'; bG.className = 'bg-gray-100 text-gray-400 px-6 py-2 rounded-full text-xs font-bold'; if (!window.mapInstance) initMap(); else setTimeout(() => window.mapInstance.invalidateSize(), 200); }
         }
-        window.switchView = switchView;
-
-        // --- Map Initialization (with pre-loaded data) ---
         function initMap() {
-            const spotsData = JSON.parse(document.getElementById('spots-data').textContent);
-            window.mapInstance = L.map('map-container').setView([34.4200, 133.0800], 11);
-            
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; OSM contributors &copy; CARTO',
-                subdomains: 'abcd',
-                maxZoom: 19
-            }).addTo(window.mapInstance);
-
-            const markersClusterGroup = L.markerClusterGroup({
-                showCoverageOnHover: false, 
-                maxClusterRadius: 50,       
-                spiderfyOnMaxZoom: true     
-            });
-            window.mapInstance.addLayer(markersClusterGroup);
-
-            spotsData.forEach(spot => {
-                if (spot.lat && spot.lng) {
-                    const html = `<div style="cursor:pointer; width:200px">
-                        <div class="popup-img-wrap"><img src="${spot.imageUrl}" class="popup-img" style="width:100%;height:120px;object-fit:cover;"></div>
-                        <div class="popup-info" style="padding:10px;background:white;">
-                            <span class="popup-area" style="font-size:10px;color:#999;font-weight:bold;">${spot.areaLabel}</span>
-                            <div class="popup-title" style="font-weight:bold;margin:5px 0;">${spot.title}</div>
-                            <a href="/spots/${spot.slug}" style="font-size:11px;color:#004098;font-weight:bold;display:block;text-align:right;">詳細を見る →</a>
-                        </div>
-                    </div>`;
-                    markersClusterGroup.addLayer(L.marker([spot.lat, spot.lng]).bindPopup(html));
+            const data = JSON.parse(document.getElementById('spots-data').textContent);
+            window.mapInstance = L.map('map-container').setView([34.4000, 133.0800], 12);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(window.mapInstance);
+            const cluster = L.markerClusterGroup({ showCoverageOnHover: false });
+            data.forEach(s => {
+                if (s.lat && s.lng) {
+                    const html = `<div style="width:200px"><img src="${s.imageUrl}" style="width:100%;height:100px;object-fit:cover;"><div style="padding:10px;font-weight:bold;">${s.title}</div><a href="/spots/${s.slug}" style="display:block;text-align:right;color:#004098;font-size:11px;">詳細を見る →</a></div>`;
+                    cluster.addLayer(L.marker([s.lat, s.lng]).bindPopup(html));
                 }
             });
+            window.mapInstance.addLayer(cluster);
         }
-
-        // --- Tab Filtering ---
         document.querySelectorAll('.tab-item').forEach(tab => {
             tab.addEventListener('click', () => {
-                document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                const filter = tab.getAttribute('data-area');
-                const items = document.querySelectorAll('.photo-item');
-                items.forEach(item => {
-                    if (filter === 'all' || item.getAttribute('data-area') === filter) {
-                        item.style.display = 'block';
-                    } else {
-                        item.style.display = 'none';
-                    }
-                });
+                document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active')); tab.classList.add('active');
+                const area = tab.getAttribute('data-area');
+                document.querySelectorAll('.photo-item').forEach(item => { item.style.display = (area === 'all' || item.getAttribute('data-area') === area) ? 'block' : 'none'; });
             });
         });
-        
         if (localStorage.getItem('rpg-mode') === 'true') toggleRPGMode();
     </script>
 </Layout>
