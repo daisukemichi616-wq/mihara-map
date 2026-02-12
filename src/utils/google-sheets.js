@@ -28,6 +28,8 @@ export async function fetchSpots() {
                         clean.imageUrl = formatDriveUrl(clean.image, 'w1000');
                         clean.lat = clean.lat ? parseFloat(clean.lat) : 0;
                         clean.lng = clean.lng ? parseFloat(clean.lng) : 0;
+                        clean.rpg_title = clean.rpg_title || "";
+                        clean.rpg_desc = clean.rpg_desc || "";
                         
                         const areas = { 'all': '全エリア', 'mihara': '三原', 'daiwa': '大和', 'kui': '久井', 'hongo': '本郷', 'sagi': '佐木島' };
                         clean.areaLabel = areas[clean.area] || clean.area || 'MIHARA';

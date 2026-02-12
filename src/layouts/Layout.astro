@@ -2,14 +2,15 @@
 const { title, description, image } = Astro.props;
 const siteTitle = "三原市まち歩き - PHOTO MAP";
 const fullTitle = title ? `${title} | ${siteTitle}` : siteTitle;
-const desc = description || "三原市の魅力を再発見するフォトマップ。";
+const desc = description || "広島県三原市の魅力を再発見するフォトマッププロジェクト。";
 const img = image || "https://i.postimg.cc/Dy2sThhC/IMG-9586.jpg";
 ---
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    
     <title>{fullTitle}</title>
     <meta name="description" content={desc}>
     <meta property="og:title" content={fullTitle}>
@@ -17,21 +18,58 @@ const img = image || "https://i.postimg.cc/Dy2sThhC/IMG-9586.jpg";
     <meta property="og:image" content={img}>
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
-    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&family=Noto+Serif+JP:wght@700&family=DotGothic16&display=swap" rel="stylesheet">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Serif+JP:wght@700;900&family=DotGothic16&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+
     <style is:global>
-        body { font-family: 'Zen Maru Gothic', sans-serif; color: #1a1a1a; }
-        .serif { font-family: 'Noto Serif JP', serif; }
-        body.rpg-mode { background: #000; color: #fff; font-family: 'DotGothic16', sans-serif; }
+        :root {
+            --palette-blue: #004098;
+            --palette-blue-light: #e1f5fe;
+            --palette-sky: #f0f7ff;
+            --palette-gold: #f5d76e;
+            --text-main: #1a1a1a;
+            --text-sub: #4b5563;
+            --border-soft: #e2e8f0;
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Zen Maru Gothic', sans-serif;
+            color: var(--text-main);
+            background-color: #fff;
+            -webkit-text-size-adjust: 100%;
+            line-height: 1.8;
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+        .serif-custom { font-family: 'Noto Serif JP', serif !important; font-weight: 700 !important; }
+        .card-frame { 
+            background: white; border-radius: 12px; padding: 40px 25px; margin-bottom: 30px; 
+            border: 1px solid var(--border-soft); box-shadow: 0 10px 30px rgba(0,64,152,0.03); 
+        }
+        .section-tag-label { font-size: 0.8rem; font-weight: 700; color: var(--palette-blue); letter-spacing: 0.25em; display: block; text-transform: uppercase; margin-bottom: 2rem; }
+        
+        /* RPG Mode CSS */
+        body.rpg-mode { background-color: #000 !important; color: #fff !important; font-family: 'DotGothic16', sans-serif !important; }
+        body.rpg-mode *:not(i) { font-family: 'DotGothic16', sans-serif !important; letter-spacing: 0.1em; }
         body.rpg-mode img { filter: none; }
-        body.rpg-mode .card-frame, body.rpg-mode nav, body.rpg-mode footer { background: #00008b; border: 3px double #fff; color: #fff; }
+        body.rpg-mode .leaflet-layer { filter: contrast(120%) saturate(200%); image-rendering: pixelated; }
+        body.rpg-mode .card-frame, body.rpg-mode nav, body.rpg-mode footer, body.rpg-mode .section-wrap:nth-child(even), body.rpg-mode .insta-cta-box {
+            background: #00008b !important; border: 3px double #fff !important; border-radius: 4px !important; color: #fff !important; box-shadow: 0 0 0 2px #000;
+        }
+        body.rpg-mode .text-blue-900, body.rpg-mode .section-tag-label, body.rpg-mode h4, body.rpg-mode a, body.rpg-mode #sub-map {
+            color: #f5d76e !important; border-color: #f5d76e !important;
+        }
     </style>
 </head>
-<body class="bg-gray-50 transition-colors duration-500">
+<body id="top">
     <slot />
-    <script>if(localStorage.getItem('rpg-mode') === 'true') document.body.classList.add('rpg-mode');</script>
+    <script>
+        if (localStorage.getItem('rpg-mode') === 'true') document.body.classList.add('rpg-mode');
+    </script>
 </body>
 </html>
