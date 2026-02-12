@@ -1,0 +1,71 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { fetchSpots } from '../../utils/google-sheets';
+
+export async function getStaticPaths() {
+    const allSpots = await fetchSpots();
+    const sortedSpots = [...allSpots].reverse();
+    return sortedSpots.map((spot, index) => {
+        const prevSpot = index > 0 ? sortedSpots[index - 1] : null;
+        const nextSpot = index < sortedSpots.length - 1 ? sortedSpots[index + 1] : null;
+        const relatedSpots = sortedSpots.filter(s => s.area === spot.area && s.slug !== spot.slug).slice(0, 3);
+        return { params: { slug: spot.slug }, props: { spot, prevSpot, nextSpot, relatedSpots } };
+    });
+}
+const { spot, prevSpot, nextSpot, relatedSpots } = Astro.props;
+---
+<Layout title={spot.title} description={spot.desc} image={spot.imageUrl}>
+    <nav class="fixed top-0 w-full bg-white/95 backdrop-blur z-50 border-b p-4 h-[60px] flex items-center justify-between">
+        <a href="/" class="text-xs font-bold text-gray-500 hover:text-blue-900 flex items-center gap-2"><i class="fa-solid fa-arrow-left"></i> トップに戻る</a>
+        <div class="font-bold text-blue-900 tracking-widest text-[10px]">MIHARA REDISCOVER</div>
+    </nav>
+    <main class="pt-[60px] min-h-screen bg-gray-50 pb-20">
+        <div class="max-w-2xl mx-auto px-4 py-4 text-[10px] font-bold text-gray-400">
+            <ol class="flex items-center gap-2 flex-wrap">
+                <li><a href="/" class="hover:text-blue-600">ホーム</a></li><li><i class="fa-solid fa-chevron-right text-[8px]"></i></li>
+                <li>{spot.areaLabel}</li><li><i class="fa-solid fa-chevron-right text-[8px]"></i></li>
+                <li class="text-gray-600 truncate max-w-[150px]">{spot.title}</li>
+            </ol>
+        </div>
+        <article class="card-frame max-w-2xl mx-auto bg-white shadow-lg sm:rounded-xl overflow-hidden mb-12">
+            <figure class="relative w-full aspect-square md:aspect-video bg-gray-200 m-0">
+                <img src={spot.imageUrl} class="w-full h-full object-cover" />
+                <span class="absolute top-4 left-4 bg-white/90 backdrop-blur text-blue-900 text-[10px] font-bold px-3 py-1 rounded shadow border border-blue-100 uppercase tracking-widest">{spot.areaLabel}</span>
+            </figure>
+            <div class="p-6 md:p-8">
+                <h1 class="font-serif text-2xl md:text-3xl font-bold text-slate-800 mb-6 leading-relaxed">{spot.title}</h1>
+                <div class="prose prose-sm max-w-none text-gray-600 leading-loose font-medium mb-10 whitespace-pre-wrap">{spot.desc || '紹介文がありません。'}</div>
+                <a href={spot.map_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent("三原市 " + spot.title)}`} target="_blank" class="flex items-center justify-center gap-2 w-full bg-blue-900 text-white font-bold py-4 rounded-lg hover:bg-blue-800 transition shadow"><i class="fa-solid fa-map-location-dot"></i> Googleマップで見る</a>
+                <div class="mt-8 pt-6 border-t flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                    <span>PHOTO BY {spot.author || '管理者'}</span>
+                    {spot.sns && <a href={spot.sns} target="_blank" class="text-blue-600 border-b border-blue-600 pb-0.5">Instagram</a>}
+                </div>
+            </div>
+        </article>
+        <div class="max-w-2xl mx-auto px-4">
+            <div class="flex justify-between items-center gap-4 mb-16 border-y border-gray-200 py-6">
+                <div class="flex-1 text-left">
+                    {prevSpot && <a href={`/spots/${prevSpot.slug}`} class="block group"><span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1 group-hover:text-blue-600"><i class="fa-solid fa-angle-left"></i> Previous</span><span class="text-sm font-bold text-gray-700 group-hover:text-blue-600 line-clamp-2">{prevSpot.title}</span></a>}
+                </div>
+                <a href="/" class="text-gray-300 hover:text-blue-900"><i class="fa-solid fa-border-all text-xl"></i></a>
+                <div class="flex-1 text-right">
+                    {nextSpot && <a href={`/spots/${nextSpot.slug}`} class="block group"><span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1 group-hover:text-blue-600">Next <i class="fa-solid fa-angle-right"></i></span><span class="text-sm font-bold text-gray-700 group-hover:text-blue-600 line-clamp-2">{nextSpot.title}</span></a>}
+                </div>
+            </div>
+            {relatedSpots.length > 0 && (
+                <section>
+                    <h3 class="text-center font-serif text-lg font-bold text-blue-900 mb-6">同じエリアのスポット</h3>
+                    <div class="grid grid-cols-3 gap-2 md:gap-4">
+                        {relatedSpots.map((related) => (
+                            <a href={`/spots/${related.slug}`} class="block group">
+                                <div class="w-full aspect-square overflow-hidden rounded-lg mb-2 bg-gray-200"><img src={related.imageUrl} loading="lazy" class="w-full h-full object-cover transition duration-500 group-hover:scale-110" /></div>
+                                <h4 class="text-[10px] md:text-xs font-bold text-gray-600 line-clamp-2 leading-snug group-hover:text-blue-600">{related.title}</h4>
+                            </a>
+                        ))}
+                    </div>
+                </section>
+            )}
+        </div>
+    </main>
+    <footer class="text-center py-10 text-[10px] text-gray-400 bg-white border-t mt-10 uppercase tracking-widest font-bold">&copy; 2026 Mihara Walk Photo Map</footer>
+</Layout>

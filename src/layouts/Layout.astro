@@ -1,0 +1,37 @@
+---
+const { title, description, image } = Astro.props;
+const siteTitle = "三原市まち歩き - PHOTO MAP";
+const fullTitle = title ? `${title} | ${siteTitle}` : siteTitle;
+const desc = description || "三原市の魅力を再発見するフォトマップ。";
+const img = image || "https://i.postimg.cc/Dy2sThhC/IMG-9586.jpg";
+---
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{fullTitle}</title>
+    <meta name="description" content={desc}>
+    <meta property="og:title" content={fullTitle}>
+    <meta property="og:description" content={desc}>
+    <meta property="og:image" content={img}>
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&family=Noto+Serif+JP:wght@700&family=DotGothic16&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    <style is:global>
+        body { font-family: 'Zen Maru Gothic', sans-serif; color: #1a1a1a; }
+        .serif { font-family: 'Noto Serif JP', serif; }
+        body.rpg-mode { background: #000; color: #fff; font-family: 'DotGothic16', sans-serif; }
+        body.rpg-mode img { filter: none; }
+        body.rpg-mode .card-frame, body.rpg-mode nav, body.rpg-mode footer { background: #00008b; border: 3px double #fff; color: #fff; }
+    </style>
+</head>
+<body class="bg-gray-50 transition-colors duration-500">
+    <slot />
+    <script>if(localStorage.getItem('rpg-mode') === 'true') document.body.classList.add('rpg-mode');</script>
+</body>
+</html>
