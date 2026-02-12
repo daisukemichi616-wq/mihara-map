@@ -15,79 +15,44 @@ export async function getStaticPaths() {
 const { spot, prevSpot, nextSpot, relatedSpots } = Astro.props;
 ---
 <Layout title={spot.title} description={spot.desc} image={spot.imageUrl}>
-    <!-- ナビゲーション（戻るボタン） -->
     <nav class="fixed-nav">
-        <a href="/" class="text-xs font-bold text-gray-500 hover:text-blue-900 flex items-center gap-2" style="text-decoration: none;">
-            <i class="fa-solid fa-arrow-left"></i> <span>MAPに戻る</span>
-        </a>
+        <a href="/" class="header-logo" style="cursor:pointer; text-decoration:none;"><i class="fa-solid fa-arrow-left"></i> MAPに戻る</a>
         <div class="header-logo">MIHARA REDISCOVER</div>
     </nav>
-
-    <!-- モーダル風デザインのカード -->
-    <div class="modal-wrap active" style="position: relative; display: block; background: #f3f4f6; min-h: 100vh; padding-top: 80px; padding-bottom: 80px;">
-        <div id="modal-content-area" class="max-w-[600px] mx-auto bg-white shadow-2xl sm:rounded-xl overflow-hidden" style="margin: 0 auto;">
-            
-            <img src={spot.imageUrl} class="w-full aspect-square object-cover" />
-            
-            <div class="px-8 py-12 text-left">
-                <span id="modal-area" class="text-[9px] font-bold tracking-widest text-blue-600 border border-blue-600 px-3 py-1 mb-6 inline-block uppercase">{spot.areaLabel}</span>
+    <div style="padding-top:100px; padding-bottom:60px; min-h:100vh; background:#f3f4f6; display:flex; justify-content:center;">
+        <div class="card-frame" style="width:100%; max-width:600px; margin:0 20px; padding:0; overflow:hidden;">
+            <img src={spot.imageUrl} style="width:100%; aspect-ratio:1/1; object-fit:cover;">
+            <div style="padding:30px;">
+                <span class="section-tag-label" id="modal-area" style="margin-bottom:10px;">{spot.areaLabel}</span>
+                <h1 id="modal-title" class="serif-custom" style="font-size:1.5rem; margin-bottom:20px; color:#1a1a1a;">{spot.title}</h1>
+                <p id="modal-desc" style="font-size:0.9rem; color:#4b5563; line-height:2.0; margin-bottom:30px; white-space:pre-wrap;">{spot.desc || '紹介文がありません。'}</p>
+                <a href={spot.map_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent("三原市 " + spot.title)}`} target="_blank" style="display:block; text-align:center; padding:15px; border:1px solid #004098; color:#004098; font-weight:bold; border-radius:8px; text-decoration:none; font-size:0.8rem; margin-bottom:30px;"><i class="fa-solid fa-location-dot"></i> この場所をGoogleマップで見る</a>
                 
-                <h1 id="modal-title" class="serif-custom text-2xl md:text-3xl mb-4 leading-normal text-slate-800">
-                    {spot.title}
-                </h1>
-                
-                <div id="modal-desc" class="text-sm font-medium leading-loose mb-8 text-slate-600 whitespace-pre-wrap">
-                    {spot.desc || '紹介文がありません。'}
-                </div>
-                
-                <a href={spot.map_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent("三原市 " + spot.title)}`} target="_blank" rel="noopener noreferrer" class="mb-10 flex items-center justify-center gap-2 w-full border border-blue-900 text-blue-900 font-bold text-xs py-4 rounded hover:bg-blue-50 transition" style="border: 1px solid #004098; color: #004098; text-decoration: none;">
-                    <i class="fa-solid fa-location-dot"></i> この場所をGoogleマップで見る
-                </a>
-
-                <div class="flex items-center justify-between border-t border-slate-200 pt-8">
-                    <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
-                        PHOTO BY {spot.author || '管理者'}
-                    </span>
-                    {spot.sns && (
-                        <a href={spot.sns} target="_blank" rel="noopener noreferrer" class="text-gray-900 font-bold text-[10px] border-b border-gray-900 pb-1 uppercase hover:opacity-70 transition" style="text-decoration: none; border-bottom: 1px solid;">
-                            Instagram Link
-                        </a>
-                    )}
+                <div style="border-top:1px solid #e2e8f0; padding-top:20px; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:9px; font-weight:bold; color:#cbd5e1; letter-spacing:0.1em;">PHOTO BY {spot.author || '管理者'}</span>
+                    {spot.sns && <a href={spot.sns} target="_blank" style="font-size:10px; font-weight:bold; color:#1a1a1a; border-bottom:1px solid #1a1a1a; text-decoration:none;">INSTAGRAM</a>}
                 </div>
             </div>
-
-            <!-- SEO: 内部リンク（前後のスポット） -->
-            <div class="px-8 pb-12">
-                <h4 class="text-center font-bold text-xs text-blue-900 mb-6 uppercase tracking-widest">More Spots</h4>
-                <div class="flex justify-between items-center gap-4">
-                     <div class="flex-1 text-left">
-                        {prevSpot && <a href={`/spots/${prevSpot.slug}`} class="text-[10px] font-bold text-gray-400 hover:text-blue-900 block truncate" style="text-decoration: none;"><i class="fa-solid fa-angle-left"></i> {prevSpot.title}</a>}
-                     </div>
-                     <div class="flex-1 text-right">
-                        {nextSpot && <a href={`/spots/${nextSpot.slug}`} class="text-[10px] font-bold text-gray-400 hover:text-blue-900 block truncate" style="text-decoration: none;">{nextSpot.title} <i class="fa-solid fa-angle-right"></i></a>}
-                     </div>
-                </div>
+            
+            <div style="background:#f9fafb; padding:20px; border-top:1px solid #e2e8f0;">
+                 <h4 style="text-align:center; font-size:10px; font-weight:bold; color:#004098; margin-bottom:15px;">NEARBY SPOTS</h4>
+                 <div style="display:flex; justify-content:space-between;">
+                     <div style="width:48%; text-align:left;">{prevSpot && <a href={`/spots/${prevSpot.slug}`} style="font-size:10px; font-weight:bold; color:#9ca3af; text-decoration:none;">← {prevSpot.title}</a>}</div>
+                     <div style="width:48%; text-align:right;">{nextSpot && <a href={`/spots/${nextSpot.slug}`} style="font-size:10px; font-weight:bold; color:#9ca3af; text-decoration:none;">{nextSpot.title} →</a>}</div>
+                 </div>
             </div>
         </div>
     </div>
-
-    <!-- RPGモード用スクリプト (個別ページ用) -->
+    
     <script>
-        const spotData = {
-            rpg_title: document.getElementById('rpg-title-data')?.textContent,
-            rpg_desc: document.getElementById('rpg-desc-data')?.textContent
-        };
-
+        // RPG Mode for Spot Page
+        const spotData = { rpg_title: document.getElementById('rpg-title-data')?.textContent, rpg_desc: document.getElementById('rpg-desc-data')?.textContent };
         if (localStorage.getItem('rpg-mode') === 'true') {
             document.body.classList.add('rpg-mode');
-            
             if(spotData.rpg_title) document.getElementById('modal-title').textContent = spotData.rpg_title;
             if(spotData.rpg_desc) document.getElementById('modal-desc').innerHTML = spotData.rpg_desc.replace(/\n/g, '<br>');
-            
-            // スタイルの微調整
-            document.querySelector('.fixed-nav').style.background = '#00008b';
-            document.querySelector('.fixed-nav').style.border = '3px double #fff';
-            document.querySelector('.fixed-nav').style.color = '#fff';
+            const areaLabel = document.getElementById('modal-area');
+            if(areaLabel) areaLabel.style.color = '#f5d76e';
         }
     </script>
     <div style="display:none;" id="rpg-title-data">{spot.rpg_title}</div>

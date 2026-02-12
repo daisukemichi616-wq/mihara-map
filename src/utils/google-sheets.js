@@ -31,7 +31,7 @@ export async function fetchSpots() {
                         clean.rpg_title = clean.rpg_title || "";
                         clean.rpg_desc = clean.rpg_desc || "";
                         
-                        const areas = { 'all': 'すべてのエリア', 'mihara': '三原市街', 'daiwa': '大和', 'kui': '久井', 'hongo': '本郷', 'sagi': '佐木島' };
+                        const areas = { 'all': '全エリア', 'mihara': '三原', 'daiwa': '大和', 'kui': '久井', 'hongo': '本郷', 'sagi': '佐木島' };
                         clean.areaLabel = areas[clean.area] || clean.area || 'MIHARA';
                         return clean;
                     }).filter(Boolean);
